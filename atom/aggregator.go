@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/spyrosmoux/gorss/internal/models"
+	"github.com/spyrosmoux/gorss/models"
 )
 
 type AtomAggregator struct{}
@@ -41,18 +41,18 @@ func (aggr AtomAggregator) Parse(body []byte) (models.Feed, []models.Article, er
 	}
 
 	feed := models.Feed{
-		Id:   atomFeed.ID,
-		Name: atomFeed.Title,
-		Link: atomFeed.Link[0].Href,
+		ExternalId: atomFeed.ID,
+		Name:       atomFeed.Title,
+		Link:       atomFeed.Link[0].Href,
 	}
 
-	articles := make([]models.Article, len(atomFeed.Entries))
+	var articles []models.Article
 	for _, entry := range atomFeed.Entries {
 		article := models.Article{
-			Id:      entry.ID,
-			Title:   entry.Title,
-			Content: entry.Content,
-			Link:    entry.Link.Href,
+			ExternalId: entry.ID,
+			Title:      entry.Title,
+			Content:    entry.Content,
+			Link:       entry.Link.Href,
 		}
 		articles = append(articles, article)
 	}
