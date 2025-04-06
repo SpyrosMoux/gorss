@@ -10,10 +10,14 @@ RUN go mod download
 
 COPY .. .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /gorss main.go
+RUN CGO_ENABLED=1 GOOS=linux go build -o /gorss main.go
 
 # Deploy the application binary into a lean image
-FROM alpine:3.21.2 AS build-release-stage
+FROM debian:bookworm-slim AS build-release-stage
+
+RUN apt-get update && \
+    apt-get install -y ca-certificates
+
 WORKDIR /
 COPY --from=build-stage /gorss /gorss
 ENTRYPOINT ["/gorss"]
