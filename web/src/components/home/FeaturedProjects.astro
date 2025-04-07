@@ -1,0 +1,34 @@
+---
+import type { ProjectFrontmatter } from "../../lib/types";
+import { GLOBAL } from "../../lib/variables";
+import Anchor from "../common/Anchor.astro";
+import ProjectSnippet from "../ProjectSnippet.astro";
+
+type Props = {
+  featuredProjects: Array<ProjectFrontmatter>;
+}
+
+const { featuredProjects } = Astro.props;
+---
+
+<div class="flex justify-between items-center w-full">
+  <h3 class="font-display text-lg sm:text-xl leading-loose">{GLOBAL.projectsName}</h3>
+  <Anchor url="/projects" class="text-base">{GLOBAL.viewAll}</Anchor>
+</div>
+<ul class="my-8">
+  {
+    (featuredProjects.length === 0 && <p>{GLOBAL.noProjects}</p>) ||
+      featuredProjects.map((project) => (
+        <li>
+          <ProjectSnippet
+            title={project.title}
+            description={project.description}
+            url={project.filename}
+            githubUrl={project.githubUrl}
+            liveUrl={project.liveUrl}
+            tags={project.tags ?? []}
+          />
+        </li>
+      ))
+  }
+</ul>

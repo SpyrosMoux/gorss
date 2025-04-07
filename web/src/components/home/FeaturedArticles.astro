@@ -1,0 +1,34 @@
+---
+import type { ArticleFrontmatter } from "../../lib/types";
+import { GLOBAL } from "../../lib/variables";
+import ArticleSnippet from "../ArticleSnippet.astro";
+import Anchor from "../common/Anchor.astro";
+
+type Props = {
+  featuredArticles: Array<ArticleFrontmatter>;
+}
+
+const { featuredArticles } = Astro.props;
+console.log(featuredArticles);
+---
+
+<div class="flex justify-between items-center w-full">
+  <h3 class="font-display text-lg sm:text-xl leading-loose">{GLOBAL.articlesName}</h3>
+  <Anchor url="/blog" class="text-base">{GLOBAL.viewAll}</Anchor>
+</div>
+<ul class="my-8">
+  {
+    (featuredArticles.length === 0 && <p>{GLOBAL.noArticles}</p>) ||
+      featuredArticles.map((article) => (
+        <li>
+          <ArticleSnippet
+            title={article.title}
+            description={article.description}
+            url={article.filename}
+            timestamp={article.timestamp}
+            duration={`${article.time} min`}
+          />
+        </li>
+      ))
+  }
+</ul>

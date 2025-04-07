@@ -1,0 +1,55 @@
+---
+import { projects } from "../../lib/list";
+import Section from "../../components/common/Section.astro";
+import ProjectSnippet from "../../components/ProjectSnippet.astro";
+import Layout from "../../layouts/Layout.astro";
+import { GLOBAL } from "../../lib/variables";
+---
+
+<Layout>
+  <Fragment slot="head">
+    <title>{GLOBAL.projectTitle} • {GLOBAL.username}</title>
+    <meta
+      name="description"
+      content={GLOBAL.projectLongDescription}
+    />
+    <meta property="og:title" content={`${GLOBAL.projectTitle} • ${GLOBAL.username}`} />
+    <meta
+      property="og:description"
+      content={GLOBAL.projectShortDescription}
+    />
+    <meta property="og:image" content={`${GLOBAL.rootUrl}/${GLOBAL.profileImage}`} />
+    <meta property="og:url" content={`${GLOBAL.rootUrl}/projects`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={`${GLOBAL.projectTitle} • ${GLOBAL.username}`} />
+    <meta
+      name="twitter:description"
+      content={GLOBAL.projectShortDescription}
+    />
+    <meta name="twitter:image" content={`${GLOBAL.rootUrl}/${GLOBAL.profileImage}`} />
+    <meta http-equiv="content-language" content="en" />
+    <meta name="language" content="English" />
+    <link rel="canonical" href={`${GLOBAL.rootUrl}/projects`} />
+  </Fragment>
+  <Section class="py-4 my-8">
+    <div class="flex items-center gap-4 pt-8 pb-16">
+      <h1 class="font-display text-3xl sm:text-4xl leading-loose">{GLOBAL.projectsName}</h1>
+    </div>
+    <ul>
+      {
+        projects.map((project) => (
+          <li>
+            <ProjectSnippet
+              title={project.title}
+              description={project.description}
+              url={project.filename}
+              githubUrl={project.githubUrl}
+              liveUrl={project.liveUrl}
+              tags={project.tags ?? []}
+            />
+          </li>
+        ))
+      }
+    </ul>
+  </Section>
+</Layout>

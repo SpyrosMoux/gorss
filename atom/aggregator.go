@@ -32,12 +32,12 @@ func (aggr AtomAggregator) Fetch(feed string) ([]byte, error) {
 	return body, nil
 }
 
-func (aggr AtomAggregator) Parse(body []byte) (models.Feed, []models.Article, error) {
+func (aggr AtomAggregator) Parse(body []byte) (models.Feed, []*models.Article, error) {
 	var atomFeed AtomFeed
 	err := xml.Unmarshal(body, &atomFeed)
 	if err != nil {
 		slog.Error("failed to unmarshal feed", "err", err)
-		return models.Feed{}, []models.Article{}, nil
+		return models.Feed{}, nil, nil
 	}
 
 	feed := models.Feed{
@@ -46,7 +46,7 @@ func (aggr AtomAggregator) Parse(body []byte) (models.Feed, []models.Article, er
 		Link:       atomFeed.Link[0].Href,
 	}
 
-	var articles []models.Article
+	var articles []*models.Article
 	for _, entry := range atomFeed.Entries {
 		article := models.Article{
 			ExternalId: entry.ID,
@@ -54,7 +54,7 @@ func (aggr AtomAggregator) Parse(body []byte) (models.Feed, []models.Article, er
 			Content:    entry.Content,
 			Link:       entry.Link.Href,
 		}
-		articles = append(articles, article)
+		articles = append(articles, &article)
 	}
 
 	return feed, articles, nil

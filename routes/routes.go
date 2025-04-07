@@ -14,14 +14,11 @@ func SetupRouter() *gin.Engine {
 	router.Use(gin.Recovery())
 
 	// CORS
-	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:63342"},
-		AllowMethods:     []string{"GET", "POST", "DELETE", "PUT", "OPTIONS"},
-		AllowCredentials: true,
-	}))
+	router.Use(cors.Default())
 
 	articleRepo := repositories.NewArticleRepository(db.Conn)
 	articleService := services.NewArticleService(articleRepo)
+	articleHandler := handlers.NewArticleHandler(articleService)
 
 	feedRepo := repositories.NewFeedRepository(db.Conn)
 	feedService := services.NewFeedService(feedRepo, articleService)
@@ -34,6 +31,12 @@ func SetupRouter() *gin.Engine {
 		feedGroup := apiGroup.Group("/feeds")
 		{
 			feedGroup.POST("", feedHandler.HandleAddFeed)
+			feedGroup.GET("", feedHandler.HandleGetAllFeeds)
+		}
+
+		articleGroup := apiGroup.Group("/articles")
+		{
+			articleGroup.GET("/latest", articleHandler.HandleGetLatestArticles)
 		}
 	}
 

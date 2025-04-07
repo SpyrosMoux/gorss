@@ -1,0 +1,72 @@
+---
+import { GLOBAL } from "../lib/variables";
+import Layout from "../layouts/Layout.astro";
+import ArticleList from "../components/articles/ArticleList.astro";
+import type { Article } from "../lib/samples/articles";
+
+// Fetch latest articles from the backend
+const response = await fetch('http://localhost:8080/api/articles/latest', {
+  method: 'GET',
+  headers: {
+    'Accept': 'application/json'
+  }
+});
+const { articles } = await response.json();
+---
+
+<Layout>
+  <Fragment slot="head">
+    <title>{GLOBAL.projectTitle}</title>
+    <meta
+      name="description"
+      content={GLOBAL.projectShortDescription}
+    />
+  </Fragment>
+  <ArticleList articles={articles} />
+</Layout>
+
+<script>
+  import { showNotification, getErrorMessage } from '../lib/notifications';
+
+  const fetchLatestArticles = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/articles/latest', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorMessage = getErrorMessage(response.status);
+        showNotification('error', errorMessage);
+        return;
+      }
+
+      const { articles } = await response.json();
+      const articleList = document.querySelector('.grid');
+      if (articleList) {
+        articleList.innerHTML = articles.map((article: Article) => `
+          <div class="w-[600px] h-32 mx-auto bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div class="h-full flex flex-col items-center justify-center text-center">
+              <h3 class="text-xl font-semibold line-clamp-2">
+                <a href="${article.link}" target="_blank" rel="noopener noreferrer" class="hover:text-blue-500 dark:hover:text-blue-400">
+                  ${article.title}
+                </a>
+              </h3>
+              <p class="text-gray-600 dark:text-gray-400">
+                ${new Date(article.date).toLocaleDateString()}
+              </p>
+            </div>
+          </div>
+        `).join('');
+      }
+    } catch (error) {
+      console.error('Error fetching latest articles:', error);
+      showNotification('error', 'Failed to fetch latest articles. Please try again.');
+    }
+  };
+
+  // Fetch articles when the page loads
+  document.addEventListener('DOMContentLoaded', fetchLatestArticles);
+</script>

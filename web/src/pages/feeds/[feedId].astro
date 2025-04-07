@@ -1,0 +1,59 @@
+import { GLOBAL } from "../../lib/variables";
+import Layout from "../../layouts/Layout.astro";
+import ArticleList from "../../components/articles/ArticleList.astro";
+import Section from "../../components/common/Section.astro";
+import { sampleArticles } from "../../lib/samples/articles";
+import { sampleFeeds } from "../../lib/samples/feeds";
+
+const { feedId } = Astro.params;
+
+// This will be replaced with actual API calls when backend is ready
+const feed = sampleFeeds.find(f => f.id === feedId);
+const feedArticles = sampleArticles.filter(a => a.feedId === feedId);
+
+<Layout>
+  <Fragment slot="head">
+    <title>{GLOBAL.username} • {feed?.title || 'Feed'}</title>
+    <meta
+      name="description"
+      content={feed?.description || GLOBAL.projectLongDescription}
+    />
+  </Fragment>
+  <Section>
+    <div class="flex flex-col gap-8">
+      {feed ? (
+        <>
+          <div>
+            <h1 class="text-3xl font-bold">{feed.title}</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">{feed.description}</p>
+          </div>
+          <ArticleList articles={feedArticles} />
+        </>
+      ) : (
+        <div class="text-center py-12">
+          <p class="text-gray-600 dark:text-gray-400">Feed not found.</p>
+        </div>
+      )}
+    </div>
+  </Section>
+</Layout>
+
+<script>
+  // This will be implemented when the backend is ready
+  async function fetchFeedArticles() {
+    try {
+      // const response = await fetch(`/api/feeds/${feedId}/articles`);
+      // if (!response.ok) {
+      //   throw new Error('Failed to fetch feed articles');
+      // }
+      // const data = await response.json();
+      // TODO: Update the UI with the fetched articles
+      console.log('Fetching feed articles...');
+    } catch (error) {
+      console.error('Error fetching feed articles:', error);
+    }
+  }
+
+  // Fetch articles when the page loads
+  document.addEventListener('DOMContentLoaded', fetchFeedArticles);
+</script> 

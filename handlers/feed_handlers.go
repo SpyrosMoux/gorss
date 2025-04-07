@@ -10,6 +10,7 @@ import (
 
 type FeedHandler interface {
 	HandleAddFeed(ctx *gin.Context)
+	HandleGetAllFeeds(ctx *gin.Context)
 }
 
 type feedHandler struct {
@@ -37,4 +38,14 @@ func (feedHandler feedHandler) HandleAddFeed(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusCreated, gin.H{"status": "ok"})
+}
+
+func (feedHandler feedHandler) HandleGetAllFeeds(ctx *gin.Context) {
+	feeds, err := feedHandler.feedService.GetAllFeeds()
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"feeds": feeds})
 }

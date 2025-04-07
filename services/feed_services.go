@@ -31,19 +31,19 @@ func (feedService feedService) RegisterFeed(feedUrl, feedType string) error {
 		return err
 	}
 
-	err = feedService.feedRepository.Create(feed)
+	savedFeed, err := feedService.feedRepository.Create(feed)
 	if err != nil {
 		slog.Error("failed to register", "feed", feed.Name, "err", err)
 		return err
 	}
 
-	err = feedService.articleService.SyncArticlesByFeed(feed)
+	err = feedService.articleService.SyncArticlesByFeed(savedFeed)
 	if err != nil {
-		slog.Error("failed to sync first-time articles", "feed", feed.Name, "err", err)
+		slog.Error("failed to sync first-time articles", "feed", savedFeed.Name, "err", err)
 		return err
 	}
 
-	slog.Info("registered a new feed", "feedUrl", feed.Link)
+	slog.Info("registered a new feed", "feedUrl", savedFeed.Link)
 	return nil
 }
 

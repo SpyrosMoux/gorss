@@ -1,0 +1,26 @@
+---
+import { GLOBAL } from "../../lib/variables";
+---
+
+<div class="flex flex-col items-center sm:flex-row gap-8">
+  <div class="flex items-center justify-center w-40 h-40 mb-4 bg-blue-500 rounded-full">
+    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="white">
+      <path d="M6 2h12v2H6zm0 4h12v2H6zm0 4h12v2H6zm0 4h12v2H6zm0 4h12v2H6z"/>
+    </svg>
+  </div>
+  <div>
+    <h1
+      class="text-3xl sm:text-4xl font-display font-semibold opsz text-center sm:text-left"
+    >
+      {GLOBAL.username}
+    </h1>
+    <h2
+      class="text-center text-xl sm:text-2xl font-mono font-medium sm:text-left"
+    >
+      {GLOBAL.shortDescription}
+    </h2>
+    <p class="mt-4 text-center sm:text-left text-gray-600 dark:text-gray-400">
+      {GLOBAL.longDescription}
+    </p>
+  </div>
+</div>

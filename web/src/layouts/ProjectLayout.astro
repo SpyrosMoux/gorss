@@ -1,0 +1,72 @@
+---
+import { getShortDescription, generateSourceUrl } from "../lib/utils";
+import type { ProjectFrontmatter } from "../lib/types";
+import type { MarkdownLayoutProps } from "astro";
+import Prose from "../components/Prose.astro";
+import Layout from "./Layout.astro";
+import Section from "../components/common/Section.astro";
+import Anchor from "../components/common/Anchor.astro";
+import { GLOBAL } from "../lib/variables";
+
+
+type Props = MarkdownLayoutProps<ProjectFrontmatter>;
+
+const { frontmatter } = Astro.props;
+const shortDescription = getShortDescription(frontmatter.description);
+const sourceUrl = generateSourceUrl(frontmatter.filename, "projects");
+---
+
+<Layout>
+  <Fragment slot="head">
+    <title>{frontmatter.title} • {GLOBAL.username}</title>
+    <meta name="description" content={frontmatter.description} />
+    <meta property="og:title" content={`${frontmatter.title} • ${GLOBAL.username}`} />
+    <meta property="og:description" content={shortDescription} />
+    <meta property="og:image" content={`${GLOBAL.rootUrl}/${GLOBAL.profileImage}`} />
+    <meta property="og:url" content={frontmatter.url} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={`${frontmatter.title} • ${GLOBAL.username}`} />
+    <meta name="twitter:description" content={shortDescription} />
+    <meta name="twitter:image" content={`${GLOBAL.rootUrl}/${GLOBAL.profileImage}`} />
+    <meta http-equiv="content-language" content="en" />
+    <meta name="language" content="English" />
+    <link rel="canonical" href={sourceUrl} />
+  </Fragment>
+  <Section class="mt-8">
+    <div class="flex flex-col gap-4 mt-8 mb-16">
+      <h1 class="text-3xl sm:text-4xl leading-tight font-display">
+        {frontmatter.title}
+      </h1>
+      <div class="flex text-sm gap-2">
+        {
+          frontmatter.tags
+            ? frontmatter.tags.map((tag) => (
+                <span class="-zag-text -zag-bg zag-transition font-semibold py-1 px-2">
+                  {tag}
+                </span>
+              ))
+            : null
+        }
+      </div>
+      <div class="flex gap-2">
+        {
+          frontmatter.githubUrl ? (
+            <Anchor url={frontmatter.githubUrl} class="text-base" external>
+              GitHub
+            </Anchor>
+          ) : null
+        }
+        {
+          frontmatter.liveUrl ? (
+            <Anchor url={frontmatter.liveUrl} class="text-base" external>
+              Live
+            </Anchor>
+          ) : null
+        }
+      </div>
+    </div>
+    <Prose>
+      <slot />
+    </Prose>
+  </Section>
+</Layout>

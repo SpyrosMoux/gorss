@@ -6,7 +6,7 @@ import (
 )
 
 type FeedRepository interface {
-	Create(feed models.Feed) error
+	Create(feed models.Feed) (models.Feed, error)
 	FindAll() ([]models.Feed, error)
 }
 
@@ -20,13 +20,13 @@ func NewFeedRepository(dbConn *gorm.DB) FeedRepository {
 	}
 }
 
-func (feedRepo feedRepo) Create(feed models.Feed) error {
+func (feedRepo feedRepo) Create(feed models.Feed) (models.Feed, error) {
 	result := feedRepo.dbConn.Create(&feed)
 	if result.Error != nil {
-		return result.Error
+		return models.Feed{}, result.Error
 	}
 
-	return nil
+	return feed, nil
 }
 
 func (feedRepo feedRepo) FindAll() ([]models.Feed, error) {

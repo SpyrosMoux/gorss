@@ -3,6 +3,7 @@ package models
 import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"time"
 )
 
 type Feed struct {
@@ -10,6 +11,9 @@ type Feed struct {
 	ExternalId string `json:"externalId" gorm:"unique"`
 	Name       string `json:"name" gorm:"not null"`
 	Link       string `json:"link" gorm:"not null"`
+	Articles   []Article
+	CreatedAt  time.Time `json:"createdAt"`
+	UpdatedAt  time.Time `json:"updatedAt"`
 }
 
 func (f *Feed) BeforeSave(tx *gorm.DB) error {
