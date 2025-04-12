@@ -37,6 +37,7 @@ func SetupRouter() *gin.Engine {
 		articleGroup := apiGroup.Group("/articles")
 		{
 			articleGroup.GET("/latest", articleHandler.HandleGetLatestArticles)
+			articleGroup.GET("/:feedId", articleHandler.HandleGetAllArticlesByFeedId)
 		}
 	}
 

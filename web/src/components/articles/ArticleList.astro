@@ -1,25 +1,16 @@
 ---
-import ArticleItem from "./ArticleItem.astro";
-import { Article } from "../../lib/samples/articles";
+import type { Article } from '../../lib/samples/articles';
+import ArticleItem from './ArticleItem.astro';
 
 interface Props {
   articles: Article[];
-  showContent?: boolean;
 }
 
-const { articles, showContent = false } = Astro.props;
+const { articles } = Astro.props;
 ---
 
-<div class="flex flex-col gap-8">
-  {articles.length > 0 ? (
-    <div class="grid grid-cols-1 gap-6">
-      {articles.map((article) => (
-        <ArticleItem article={article} showContent={showContent} />
-      ))}
-    </div>
-  ) : (
-    <div class="text-center py-12">
-      <p class="text-gray-600 dark:text-gray-400">No articles available.</p>
-    </div>
-  )}
+<div class="grid gap-6">
+  {articles.map((article) => (
+    <ArticleItem article={article} />
+  ))}
 </div> 

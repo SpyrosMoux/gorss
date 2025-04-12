@@ -24,21 +24,10 @@ const { isOpen } = Astro.props;
           id="feedUrl"
           name="feedUrl"
           required
+          pattern="https?://.+"
           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           placeholder="https://example.com/feed.xml"
         />
-      </div>
-      <div>
-        <label for="feedType" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Feed Type</label>
-        <select
-          id="feedType"
-          name="feedType"
-          required
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-        >
-          <option value="atom">Atom</option>
-          <option value="rss">RSS</option>
-        </select>
       </div>
       <div class="flex justify-end">
         <button
@@ -54,6 +43,7 @@ const { isOpen } = Astro.props;
 
 <script>
   import { showNotification, getErrorMessage } from '../../lib/notifications';
+  import { API_ENDPOINTS } from '../../lib/config';
 
   const modal = document.getElementById('addFeedModal');
   const closeButton = document.getElementById('closeModal');
@@ -68,36 +58,51 @@ const { isOpen } = Astro.props;
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const formData = {
-      feedUrl: (document.getElementById('feedUrl') as HTMLInputElement).value,
-      feedType: (document.getElementById('feedType') as HTMLSelectElement).value,
-    };
+    const urlInput = document.getElementById('feedUrl') as HTMLInputElement;
+    const feedUrl = urlInput.value.trim();
+    
+    if (!feedUrl) {
+      showNotification('error', 'Please enter a valid feed URL');
+      return;
+    }
 
     try {
-      const response = await fetch('http://localhost:8080/api/feeds', {
+      console.log('Sending request to:', API_ENDPOINTS.feeds.create);
+      console.log('With data:', { feedUrl });
+
+      const response = await fetch(API_ENDPOINTS.feeds.create, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({ feedUrl })
       });
+
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
         const errorMessage = getErrorMessage(response.status);
+        console.error('Error response:', errorMessage);
         showNotification('error', errorMessage);
         return;
       }
 
-      // Show success message
+      const data = await response.json();
+      console.log('Success response:', data);
+
       showNotification('success', 'Feed added successfully!');
-      
-      // Close modal and refresh the feed list
       closeModal();
       window.location.reload();
     } catch (error) {
       console.error('Error adding feed:', error);
-      showNotification('error', 'Failed to add feed. Please try again.');
+      if (error instanceof Error) {
+        console.error('Error details:', error.message);
+        showNotification('error', `Failed to add feed: ${error.message}`);
+      } else {
+        showNotification('error', 'Failed to add feed. Please try again.');
+      }
     }
   });
 </script> 

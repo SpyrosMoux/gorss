@@ -10,6 +10,7 @@ import (
 type ArticleRepository interface {
 	CreateMany(articles []*models.Article) error
 	FindAllByDate(orderDirection db.OrderDirection) ([]*models.Article, error)
+	FindAllByFeedId(feedId string) ([]*models.Article, error)
 }
 
 type articleRepository struct {
@@ -35,6 +36,15 @@ func (articleRepository articleRepository) FindAllByDate(orderDirection db.Order
 
 	var articles []*models.Article
 	result := articleRepository.dbConn.Order(order).Limit(5).Find(&articles)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return articles, nil
+}
+
+func (articleRepository articleRepository) FindAllByFeedId(feedId string) ([]*models.Article, error) {
+	var articles []*models.Article
+	result := articleRepository.dbConn.Find(&articles).Where("feedId = ?1", feedId)
 	if result.Error != nil {
 		return nil, result.Error
 	}

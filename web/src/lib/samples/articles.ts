@@ -1,28 +1,34 @@
 export interface Article {
   id: string;
+  externalId: string;
   title: string;
   content: string;
   link: string;
-  feedId: string;
-  date: string;
+  imageUrl: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Sample articles for development and testing
 export const sampleArticles: Article[] = [
   {
     id: "1",
+    externalId: "ext1",
     title: "Sample Article 1",
-    content: "<div>Sample content 1</div>",
-    link: "https://example.com/1",
-    feedId: "feed-1",
-    date: "2024-04-07T22:22:47.645525+03:00"
+    content: "This is a sample article content.",
+    link: "https://example.com/article1",
+    imageUrl: "https://picsum.photos/600/400",
+    createdAt: "2024-01-01T00:00:00Z",
+    updatedAt: "2024-01-01T00:00:00Z"
   },
   {
     id: "2",
+    externalId: "ext2",
     title: "Sample Article 2",
-    content: "<div>Sample content 2</div>",
-    link: "https://example.com/2",
-    feedId: "feed-2",
-    date: "2024-04-07T22:22:47.645525+03:00"
+    content: "This is another sample article content.",
+    link: "https://example.com/article2",
+    imageUrl: "",
+    createdAt: "2024-01-02T00:00:00Z",
+    updatedAt: "2024-01-02T00:00:00Z"
   }
 ]; 

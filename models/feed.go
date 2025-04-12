@@ -2,24 +2,24 @@ package models
 
 import (
 	"github.com/google/uuid"
-	"gorm.io/gorm"
+	"github.com/mmcdole/gofeed"
 	"time"
 )
 
 type Feed struct {
-	Id         string `json:"id" gorm:"primaryKey"`
-	ExternalId string `json:"externalId" gorm:"unique"`
-	Name       string `json:"name" gorm:"not null"`
-	Link       string `json:"link" gorm:"not null"`
-	Articles   []Article
-	CreatedAt  time.Time `json:"createdAt"`
-	UpdatedAt  time.Time `json:"updatedAt"`
+	Id        string `json:"id" gorm:"primaryKey"`
+	Name      string `json:"name" gorm:"not null"`
+	Link      string `json:"link" gorm:"not null"`
+	Articles  []Article
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func (f *Feed) BeforeSave(tx *gorm.DB) error {
-	if f.Id == "" {
-		f.Id = uuid.NewString()
+func FeedFromGoFeed(goFeed *gofeed.Feed) Feed {
+	return Feed{
+		Id:       uuid.NewString(),
+		Name:     goFeed.Title,
+		Link:     goFeed.FeedLink,
+		Articles: []Article{},
 	}
-
-	return nil
 }

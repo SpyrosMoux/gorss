@@ -1,35 +1,39 @@
 package services
 
 import (
-	"log/slog"
-
-	"github.com/spyrosmoux/gorss/atom"
+	"github.com/mmcdole/gofeed"
 	"github.com/spyrosmoux/gorss/models"
 	"github.com/spyrosmoux/gorss/repositories"
+	"log/slog"
 )
 
 type FeedService interface {
-	RegisterFeed(feedUrl, feedType string) error
+	RegisterFeed(feedUrl string) error
 	GetAllFeeds() ([]models.Feed, error)
 }
 
 type feedService struct {
 	feedRepository repositories.FeedRepository
 	articleService ArticleService
+	feedParser     *gofeed.Parser
 }
 
 func NewFeedService(feedRepo repositories.FeedRepository, articleService ArticleService) FeedService {
 	return &feedService{
 		feedRepository: feedRepo,
 		articleService: articleService,
+		feedParser:     gofeed.NewParser(),
 	}
 }
 
-func (feedService feedService) RegisterFeed(feedUrl, feedType string) error {
-	feed, err := registerAtomFeed(feedUrl)
+func (feedService feedService) RegisterFeed(feedUrl string) error {
+	goFeed, err := feedService.feedParser.ParseURL(feedUrl)
 	if err != nil {
+		slog.Error("failed to parse feed", "feedUrl", feedUrl, "err", err)
 		return err
 	}
+
+	feed := models.FeedFromGoFeed(goFeed)
 
 	savedFeed, err := feedService.feedRepository.Create(feed)
 	if err != nil {
@@ -55,20 +59,4 @@ func (feedService feedService) GetAllFeeds() ([]models.Feed, error) {
 	}
 
 	return feeds, nil
-}
-
-func registerAtomFeed(feedUrl string) (models.Feed, error) {
-	atomAggr := atom.NewAtomAggregator()
-	atomFeed, err := atomAggr.Fetch(feedUrl)
-	if err != nil {
-		return models.Feed{}, err
-	}
-
-	feed, _, err := atomAggr.Parse(atomFeed)
-	if err != nil {
-		return models.Feed{}, err
-	}
-
-	feed.Link = feedUrl
-	return feed, nil
 }

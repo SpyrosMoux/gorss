@@ -31,7 +31,7 @@ func (feedHandler feedHandler) HandleAddFeed(ctx *gin.Context) {
 		return
 	}
 
-	err = feedHandler.feedService.RegisterFeed(addFeedDto.FeedUrl, addFeedDto.FeedType)
+	err = feedHandler.feedService.RegisterFeed(addFeedDto.FeedUrl)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
