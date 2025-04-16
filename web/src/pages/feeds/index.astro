@@ -4,15 +4,22 @@ import Layout from "../../layouts/Layout.astro";
 import FeedList from "../../components/feeds/FeedList.astro";
 import Section from "../../components/common/Section.astro";
 import type { Feed } from "../../lib/samples/feeds";
+import { API_ENDPOINTS } from "../../lib/config";
 
 // Fetch feeds server-side
-const response = await fetch('http://localhost:8080/api/feeds', {
+const response = await fetch(API_ENDPOINTS.feeds.list, {
   method: 'GET',
   headers: {
     'Accept': 'application/json'
   }
 });
-const { feeds } = await response.json();
+
+let feeds: Feed[] = [];
+
+if (response.ok) {
+  const data = await response.json();
+  feeds = data.feeds || [];
+}
 ---
 
 <Layout>
@@ -28,10 +35,17 @@ const { feeds } = await response.json();
   </Section>
 </Layout>
 
-<script>
+<script define:vars={{ API_BASE_URL: import.meta.env.PUBLIC_API_BASE_URL || 'http://localhost:8080' }}>
+  // Define API endpoints for client-side use
+  const API_ENDPOINTS = {
+    feeds: {
+      list: `${API_BASE_URL}/api/feeds`
+    }
+  };
+
   async function fetchFeeds() {
     try {
-      const response = await fetch('http://localhost:8080/api/feeds', {
+      const response = await fetch(API_ENDPOINTS.feeds.list, {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
@@ -40,12 +54,12 @@ const { feeds } = await response.json();
       if (!response.ok) {
         throw new Error('Failed to fetch feeds');
       }
-      const { feeds: apiFeeds } = await response.json();
+      const { feeds: apiFeeds = [] } = await response.json();
       
       // Update the feeds list in the UI
       const feedList = document.querySelector('.grid');
       if (feedList) {
-        feedList.innerHTML = apiFeeds.map((feed: Feed) => `
+        feedList.innerHTML = apiFeeds.map((feed) => `
           <div class="p-6 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 transition-colors">
             <div class="flex flex-col gap-2">
               <h3 class="text-xl font-semibold">

@@ -3,18 +3,20 @@ TAG ?= latest
 PLATFORM = linux/amd64
 BUILD_DIR = build
 
-.PHONY: build build-docker run run-docker
+.PHONY: build build-docker-api build-docker-web run run-docker
 
 default: run
 
 build:
 	go build -o $(BUILD_DIR)/gorss ./main.go
 
-build-docker:
-	docker build -t $(DOCKER_REPO)/gorss:$(TAG) . -f docker/Dockerfile --platform $(PLATFORM)
+build-docker-api:
+	docker build -t $(DOCKER_REPO)/gorss:$(TAG) . -f docker/Dockerfile.api --platform $(PLATFORM)
+	docker push $(DOCKER_REPO)/gorss:$(TAG)
+
+build-docker-web:
+	docker build -t $(DOCKER_REPO)/gorss-web:$(TAG) . -f docker/Dockerfile.web --platform $(PLATFORM)
+	docker push $(DOCKER_REPO)/gorss-web:$(TAG)
 
 run:
 	go run main.go
-
-run-docker: build-docker
-	docker run -d $(DOCKER_REPO)/gorss:$(TAG) -p 8080:8080

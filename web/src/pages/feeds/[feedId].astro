@@ -30,8 +30,15 @@ export async function getStaticPaths() {
 
 const { feedId } = Astro.params;
 
+if (!feedId) {
+  throw new Error('Feed ID is required');
+}
+
 // Fetch articles for this feed
-const response = await fetch(`${API_ENDPOINTS.articles.feed}/${feedId}`, {
+const endpoint = API_ENDPOINTS.articles.byFeed(feedId);
+console.log('Fetching articles from:', endpoint);
+
+const response = await fetch(endpoint, {
   method: 'GET',
   headers: {
     'Accept': 'application/json'
@@ -39,7 +46,14 @@ const response = await fetch(`${API_ENDPOINTS.articles.feed}/${feedId}`, {
 });
 
 if (!response.ok) {
-  throw new Error(`Failed to fetch articles for feed ${feedId}`);
+  const errorText = await response.text();
+  console.error('Failed to fetch articles:', {
+    status: response.status,
+    statusText: response.statusText,
+    error: errorText,
+    endpoint
+  });
+  throw new Error(`Failed to fetch articles for feed ${feedId}: ${response.status} ${response.statusText}`);
 }
 
 const { articles } = await response.json();
@@ -58,14 +72,7 @@ const { articles } = await response.json();
   </Section>
 </Layout>
 
-<script>
-  // Define API endpoints for client-side use
-  const API_ENDPOINTS = {
-    articles: {
-      feed: 'http://localhost:8080/api/articles'
-    }
-  };
-
+<script define:vars={{ API_BASE_URL: import.meta.env.PUBLIC_API_BASE_URL || 'http://localhost:8080' }}>
   // Format date function
   function formatDate(dateString: string | undefined) {
     if (!dateString) {
@@ -86,10 +93,20 @@ const { articles } = await response.json();
   // Get the feedId from the URL
   const currentFeedId = window.location.pathname.split('/').pop();
 
+  // Define API endpoints for client-side use
+  const API_ENDPOINTS = {
+    articles: {
+      byFeed: (feedId) => `${API_BASE_URL}/api/articles/${feedId}`
+    }
+  };
+
   // Client-side fetch to update articles
   async function fetchArticles() {
     try {
-      const response = await fetch(`${API_ENDPOINTS.articles.feed}/${currentFeedId}`, {
+      const endpoint = API_ENDPOINTS.articles.byFeed(currentFeedId);
+      console.log('Fetching articles from:', endpoint);
+
+      const response = await fetch(endpoint, {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
@@ -97,15 +114,22 @@ const { articles } = await response.json();
       });
       
       if (!response.ok) {
-        throw new Error('Failed to fetch articles');
+        const errorText = await response.text();
+        console.error('Failed to fetch articles:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorText,
+          endpoint
+        });
+        throw new Error(`Failed to fetch articles: ${response.status} ${response.statusText}`);
       }
       
-      const { articles: apiArticles } = await response.json();
+      const { articles: apiArticles = [] } = await response.json();
       
       // Update the articles list in the UI
       const articleList = document.querySelector('.grid');
       if (articleList) {
-        articleList.innerHTML = apiArticles.map((article: Article) => `
+        articleList.innerHTML = apiArticles.map((article) => `
           <article class="w-[600px] h-32 mx-auto bg-white dark:bg-gray-800 rounded-lg shadow p-4">
             <div class="h-full flex flex-col items-center justify-center text-center">
               <h3 class="text-xl font-semibold line-clamp-2">

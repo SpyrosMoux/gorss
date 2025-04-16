@@ -41,68 +41,112 @@ const { isOpen } = Astro.props;
   </div>
 </div>
 
-<script>
-  import { showNotification, getErrorMessage } from '../../lib/notifications';
-  import { API_ENDPOINTS } from '../../lib/config';
+<script is:inline define:vars={{ API_BASE_URL: import.meta.env.PUBLIC_API_BASE_URL || 'http://localhost:8080' }}>
+  (async () => {
+    // Define notification functions
+    function showNotification(type, message) {
+      const notification = document.createElement('div');
+      notification.innerHTML = `
+        <div class="fixed bottom-4 right-4 z-50">
+          <div class="p-4 rounded-lg shadow-lg ${
+            type === 'success' ? 'bg-green-500' : 'bg-red-500'
+          } text-white">
+            ${message}
+          </div>
+        </div>
+      `;
+      document.body.appendChild(notification);
 
-  const modal = document.getElementById('addFeedModal');
-  const closeButton = document.getElementById('closeModal');
-  const form = document.getElementById('addFeedForm');
-
-  function closeModal() {
-    modal?.classList.add('hidden');
-  }
-
-  closeButton?.addEventListener('click', closeModal);
-
-  form?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const urlInput = document.getElementById('feedUrl') as HTMLInputElement;
-    const feedUrl = urlInput.value.trim();
-    
-    if (!feedUrl) {
-      showNotification('error', 'Please enter a valid feed URL');
-      return;
+      // Auto-hide after 2 seconds
+      setTimeout(() => {
+        notification.remove();
+      }, 2000);
     }
 
-    try {
-      console.log('Sending request to:', API_ENDPOINTS.feeds.create);
-      console.log('With data:', { feedUrl });
+    function getErrorMessage(status) {
+      switch (status) {
+        case 400:
+          return 'Invalid request. Please check your input and try again.';
+        case 401:
+          return 'Unauthorized. Please check your credentials.';
+        case 403:
+          return 'Forbidden. You do not have permission to perform this action.';
+        case 404:
+          return 'Resource not found. Please check the URL and try again.';
+        case 409:
+          return 'Conflict. This feed might already exist.';
+        case 500:
+          return 'Server error. Please try again later.';
+        default:
+          return 'An unexpected error occurred. Please try again.';
+      }
+    }
 
-      const response = await fetch(API_ENDPOINTS.feeds.create, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ feedUrl })
-      });
+    const modal = document.getElementById('addFeedModal');
+    const closeButton = document.getElementById('closeModal');
+    const form = document.getElementById('addFeedForm');
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+    // Define API endpoints for client-side use
+    const API_ENDPOINTS = {
+      feeds: {
+        create: `${API_BASE_URL}/api/feeds`
+      }
+    };
 
-      if (!response.ok) {
-        const errorMessage = getErrorMessage(response.status);
-        console.error('Error response:', errorMessage);
-        showNotification('error', errorMessage);
+    function closeModal() {
+      modal?.classList.add('hidden');
+    }
+
+    closeButton?.addEventListener('click', closeModal);
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const urlInput = document.getElementById('feedUrl');
+      const feedUrl = urlInput?.value.trim();
+      
+      if (!feedUrl) {
+        showNotification('error', 'Please enter a valid feed URL');
         return;
       }
 
-      const data = await response.json();
-      console.log('Success response:', data);
+      try {
+        console.log('Sending request to:', API_ENDPOINTS.feeds.create);
+        console.log('With data:', { feedUrl });
 
-      showNotification('success', 'Feed added successfully!');
-      closeModal();
-      window.location.reload();
-    } catch (error) {
-      console.error('Error adding feed:', error);
-      if (error instanceof Error) {
-        console.error('Error details:', error.message);
-        showNotification('error', `Failed to add feed: ${error.message}`);
-      } else {
-        showNotification('error', 'Failed to add feed. Please try again.');
+        const response = await fetch(API_ENDPOINTS.feeds.create, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ feedUrl })
+        });
+
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+        if (!response.ok) {
+          const errorMessage = getErrorMessage(response.status);
+          console.error('Error response:', errorMessage);
+          showNotification('error', errorMessage);
+          return;
+        }
+
+        const data = await response.json();
+        console.log('Success response:', data);
+
+        showNotification('success', 'Feed added successfully!');
+        closeModal();
+        window.location.reload();
+      } catch (error) {
+        console.error('Error adding feed:', error);
+        if (error instanceof Error) {
+          showNotification('error', error.message);
+        } else {
+          showNotification('error', 'An unexpected error occurred');
+        }
       }
-    }
-  });
+    });
+  })();
 </script> 
