@@ -1,6 +1,8 @@
-package dto
+package article
 
-import "time"
+import (
+	"time"
+)
 
 type ArticleDto struct {
 	Id       string    `json:"id"`

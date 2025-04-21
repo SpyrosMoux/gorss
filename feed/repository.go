@@ -1,4 +1,4 @@
-package repositories
+package feed
 
 import (
 	"github.com/spyrosmoux/gorss/models"

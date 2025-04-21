@@ -1,10 +1,11 @@
-package services
+package feed
 
 import (
-	"github.com/mmcdole/gofeed"
-	"github.com/spyrosmoux/gorss/models"
-	"github.com/spyrosmoux/gorss/repositories"
 	"log/slog"
+
+	"github.com/mmcdole/gofeed"
+	"github.com/spyrosmoux/gorss/article"
+	"github.com/spyrosmoux/gorss/models"
 )
 
 type FeedService interface {
@@ -13,12 +14,12 @@ type FeedService interface {
 }
 
 type feedService struct {
-	feedRepository repositories.FeedRepository
-	articleService ArticleService
+	feedRepository FeedRepository
 	feedParser     *gofeed.Parser
+	articleService article.ArticleService
 }
 
-func NewFeedService(feedRepo repositories.FeedRepository, articleService ArticleService) FeedService {
+func NewFeedService(feedRepo FeedRepository, articleService article.ArticleService) FeedService {
 	return &feedService{
 		feedRepository: feedRepo,
 		articleService: articleService,
@@ -33,7 +34,7 @@ func (feedService feedService) RegisterFeed(feedUrl string) error {
 		return err
 	}
 
-	feed := models.FeedFromGoFeed(goFeed)
+	feed := FeedFromGoFeed(goFeed)
 
 	savedFeed, err := feedService.feedRepository.Create(feed)
 	if err != nil {

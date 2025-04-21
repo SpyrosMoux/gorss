@@ -1,10 +1,12 @@
-package repositories
+package article
 
 import (
 	"fmt"
+
 	"github.com/spyrosmoux/gorss/db"
 	"github.com/spyrosmoux/gorss/models"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type ArticleRepository interface {
@@ -17,14 +19,15 @@ type articleRepository struct {
 	dbConn *gorm.DB
 }
 
-func NewArticleRepository(dbConn *gorm.DB) ArticleRepository {
+func NewRepository(dbConn *gorm.DB) ArticleRepository {
 	return &articleRepository{
 		dbConn: dbConn,
 	}
 }
 
+// CreateMany inserts a batch of articles skipping duplicates
 func (articleRepository articleRepository) CreateMany(articles []*models.Article) error {
-	result := articleRepository.dbConn.Create(&articles)
+	result := articleRepository.dbConn.Clauses(clause.OnConflict{DoNothing: true}).Create(&articles)
 	if result.Error != nil {
 		return result.Error
 	}

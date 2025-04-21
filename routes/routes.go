@@ -1,12 +1,13 @@
 package routes
 
 import (
+	"net/http"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/spyrosmoux/gorss/article"
 	"github.com/spyrosmoux/gorss/db"
-	"github.com/spyrosmoux/gorss/handlers"
-	"github.com/spyrosmoux/gorss/repositories"
-	"github.com/spyrosmoux/gorss/services"
+	"github.com/spyrosmoux/gorss/feed"
 )
 
 func SetupRouter() *gin.Engine {
@@ -16,17 +17,17 @@ func SetupRouter() *gin.Engine {
 	// CORS
 	router.Use(cors.Default())
 
-	articleRepo := repositories.NewArticleRepository(db.Conn)
-	articleService := services.NewArticleService(articleRepo)
-	articleHandler := handlers.NewArticleHandler(articleService)
+	articleRepo := article.NewRepository(db.Conn)
+	articleService := article.NewArticleService(articleRepo)
+	articleHandler := article.NewArticleHandler(articleService)
 
-	feedRepo := repositories.NewFeedRepository(db.Conn)
-	feedService := services.NewFeedService(feedRepo, articleService)
-	feedHandler := handlers.NewFeedHandler(feedService)
+	feedRepo := feed.NewFeedRepository(db.Conn)
+	feedService := feed.NewFeedService(feedRepo, articleService)
+	feedHandler := feed.NewFeedHandler(feedService)
 
 	apiGroup := router.Group("/api")
 	{
-		apiGroup.GET("/healthz", handlers.HealthHandler)
+		apiGroup.GET("/healthz", HealthHandler)
 
 		feedGroup := apiGroup.Group("/feeds")
 		{
@@ -42,4 +43,8 @@ func SetupRouter() *gin.Engine {
 	}
 
 	return router
+}
+
+func HealthHandler(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, gin.H{"status": "I'm Alive!"})
 }

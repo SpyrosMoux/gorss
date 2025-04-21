@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/spyrosmoux/gorss/models"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
 var Conn *gorm.DB
 
-func Connect() error {
+func Connect(models ...interface{}) error {
 	var err error
 	Conn, err = gorm.Open(sqlite.Open("./db.sqlite"), &gorm.Config{})
 	if err != nil {
@@ -20,7 +19,7 @@ func Connect() error {
 
 	slog.Info("connected to database")
 
-	err = Conn.AutoMigrate(&models.Feed{}, &models.Article{})
+	err = Conn.AutoMigrate(models...)
 	if err != nil {
 		return fmt.Errorf("failed to migrate models err=%v", err)
 	}

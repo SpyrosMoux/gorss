@@ -1,26 +1,25 @@
-package services
+package article
 
 import (
+	"log/slog"
+
 	"github.com/mmcdole/gofeed"
 	"github.com/spyrosmoux/gorss/db"
-	"github.com/spyrosmoux/gorss/dto"
 	"github.com/spyrosmoux/gorss/models"
-	"github.com/spyrosmoux/gorss/repositories"
-	"log/slog"
 )
 
 type ArticleService interface {
 	SyncArticlesByFeed(feed models.Feed) error
-	GetLatestArticles() ([]*dto.ArticleDto, error)
-	GetAllArticlesByFeedId(feedId string) ([]*dto.ArticleDto, error)
+	GetLatestArticles() ([]*ArticleDto, error)
+	GetAllArticlesByFeedId(feedId string) ([]*ArticleDto, error)
 }
 
 type articleService struct {
-	articleRepo repositories.ArticleRepository
+	articleRepo ArticleRepository
 	feedParser  *gofeed.Parser
 }
 
-func NewArticleService(articleRepo repositories.ArticleRepository) ArticleService {
+func NewArticleService(articleRepo ArticleRepository) ArticleService {
 	return &articleService{
 		articleRepo: articleRepo,
 		feedParser:  gofeed.NewParser(),
@@ -36,7 +35,7 @@ func (articleService articleService) SyncArticlesByFeed(feed models.Feed) error 
 
 	var articles []*models.Article
 	for _, item := range feedData.Items {
-		article := models.ArticleFromGoFeedItem(item)
+		article := ArticleFromGoFeedItem(item)
 		article.FeedID = feed.Id
 		article.Feed = feed
 		articles = append(articles, &article)
@@ -51,14 +50,14 @@ func (articleService articleService) SyncArticlesByFeed(feed models.Feed) error 
 	return nil
 }
 
-func (articleService articleService) GetLatestArticles() ([]*dto.ArticleDto, error) {
+func (articleService articleService) GetLatestArticles() ([]*ArticleDto, error) {
 	articles, err := articleService.articleRepo.FindAllByDate(db.ORDER_DESCENDING)
 	if err != nil {
 		slog.Error("failed to get latest articles", "err", err)
 		return nil, err
 	}
 
-	var articleDtos []*dto.ArticleDto
+	var articleDtos []*ArticleDto
 	for _, article := range articles {
 		articleDto := articleToArticleDto(*article)
 		articleDtos = append(articleDtos, &articleDto)
@@ -67,14 +66,14 @@ func (articleService articleService) GetLatestArticles() ([]*dto.ArticleDto, err
 	return articleDtos, nil
 }
 
-func (articleService articleService) GetAllArticlesByFeedId(feedId string) ([]*dto.ArticleDto, error) {
+func (articleService articleService) GetAllArticlesByFeedId(feedId string) ([]*ArticleDto, error) {
 	articles, err := articleService.articleRepo.FindAllByFeedId(feedId)
 	if err != nil {
 		slog.Error("failed to get articles by feed id", "feedId", feedId, "err", err)
 		return nil, err
 	}
 
-	var articleDtos []*dto.ArticleDto
+	var articleDtos []*ArticleDto
 	for _, article := range articles {
 		articleDto := articleToArticleDto(*article)
 		articleDtos = append(articleDtos, &articleDto)
@@ -83,8 +82,8 @@ func (articleService articleService) GetAllArticlesByFeedId(feedId string) ([]*d
 	return articleDtos, nil
 }
 
-func articleToArticleDto(article models.Article) dto.ArticleDto {
-	return dto.ArticleDto{
+func articleToArticleDto(article models.Article) ArticleDto {
+	return ArticleDto{
 		Id:       article.Id,
 		Title:    article.Title,
 		Content:  article.Content,
