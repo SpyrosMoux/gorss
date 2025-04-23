@@ -6,6 +6,8 @@ import Section from "../../components/common/Section.astro";
 import type { Article } from "../../lib/samples/articles";
 import { API_ENDPOINTS } from "../../lib/config";
 
+export const prerender = false;
+
 // Define the paths that should be generated at build time
 export async function getStaticPaths() {
   // Fetch all feeds to get their IDs
