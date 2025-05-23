@@ -1,82 +1,54 @@
-![Zaggonaut, a retro-inspired theme for Astro.](./images/README.png)
+# React + TypeScript + Vite
 
-Zaggonaut is a retro-inspired theme for Astro, built using TypeScript, TailwindCSS, and of course, Astro.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Getting Started
+Currently, two official plugins are available:
 
-[View the demo](https://zaggonaut.dev) or [view the source code](https://github.com/RATIU5/zaggonaut).
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-Alternatively, you can create a new Astro project with Zaggonaut like this:
+## Expanding the ESLint configuration
 
-```bash
-# npm
-npm create astro@latest -- --template RATIU5/zaggonaut
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-# pnpm
-pnpm create astro@latest --template RATIU5/zaggonaut
-
-# yarn
-yarn create astro --template RATIU5/zaggonaut
-
-# bun
-bun create astro@latest -- --template RATIU5/zaggonaut
+```js
+export default tseslint.config({
+  extends: [
+    // Remove ...tseslint.configs.recommended and replace with this
+    ...tseslint.configs.recommendedTypeChecked,
+    // Alternatively, use this for stricter rules
+    ...tseslint.configs.strictTypeChecked,
+    // Optionally, add this for stylistic rules
+    ...tseslint.configs.stylisticTypeChecked,
+  ],
+  languageOptions: {
+    // other options...
+    parserOptions: {
+      project: ['./tsconfig.node.json', './tsconfig.app.json'],
+      tsconfigRootDir: import.meta.dirname,
+    },
+  },
+})
 ```
 
-## Features
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-- Dark & light mode
-- Customizable colors
-- 100 / 100 Lighthouse score
-- Fully accessible
-- Fully responsive
-- Type-safe
-- SEO-friendly
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
 
-## Customization
-
-The entire theme is fully customizable. The theme is setup a specific way to make it easy to customize.
-
-### Colors
-
-You can customize the colors of the theme by editing the `src/styles/global.css` file.
-This file uses Tailwind CSS and CSS variables to customize the colors of the theme.
-Zaggonaut uses the following CSS variables:
-
-- `--color-zag-dark`: The dark color of the theme
-- `--color-zag-light`: The light color of the theme
-- `--color-zag-dark-muted`: The dark color of the theme with a slight opacity
-- `--color-zag-light-muted`: The light color of the theme with a slight opacity
-- `--color-zag-accent-light`: The light accent color of the theme
-- `--color-zag-accent-light-muted`: The light accent color of the theme with a slight opacity
-- `--color-zag-accent-dark`: The dark accent color of the theme
-- `--color-zag-accent-dark-muted`: The dark accent color of the theme with a slight opacity
-
-### Text
-
-You can customize the text of the theme by editing the `src/lib/variables.ts` file.
-This file contains all of the text used throughout the theme.
-
-For example, you can change the `username` variable to your own username and everywhere the username is used will be replaced with your username.
-
-```typescript
-export const GLOBAL = {
-  // Site metadata
-  username: "zaggonaut-fan123",
-
-  // ...
-
-  // Profile image
-  profileImage: "profile.webp",
-
-  // Menu items
-  menu: {
-    home: "/",
-    projects: "/projects",
-    blog: "/blog",
-  }
-};
+export default tseslint.config({
+  plugins: {
+    // Add the react-x and react-dom plugins
+    'react-x': reactX,
+    'react-dom': reactDom,
+  },
+  rules: {
+    // other rules...
+    // Enable its recommended typescript rules
+    ...reactX.configs['recommended-typescript'].rules,
+    ...reactDom.configs.recommended.rules,
+  },
+})
 ```
-
-## Ready To Try?
-
-Check out [the theme website](https://zaggonaut.dev) to give it a spin!
