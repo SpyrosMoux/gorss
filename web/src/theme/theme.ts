@@ -3,7 +3,7 @@ import { palette } from "./palette";
 
 export const theme = createTheme({
   typography: {
-    fontFamily: "Space Mono",
+    fontFamily: "JetBrains Mono",
   },
 
   palette: palette,
