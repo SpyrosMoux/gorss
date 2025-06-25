@@ -1,8 +1,29 @@
 import Box from "@mui/material/Box";
-import {Typography} from "@mui/material";
+import { Typography } from "@mui/material";
+import { useMemo } from "react";
+import { DateTime } from "luxon";
 
-export const ArticleCard = () => {
-    return (<Box padding={4} sx={{
+interface Props {
+  title: string;
+  date: string;
+  hyperlink: string;
+}
+
+export const ArticleCard = (props: Props) => {
+  const { title, date, hyperlink } = props;
+
+  const formattedDate = useMemo(() => {
+    const truncatedIso = date.split(".")[0] + "Z";
+    return DateTime.fromISO(truncatedIso).toFormat("LLLL d, yyyy");
+  }, [date]);
+
+  const handleClick = () => {
+    window.open(hyperlink, "_blank", "noopener,noreferrer");
+  };
+  return (
+    <Box
+      padding={4}
+      sx={{
         fontWeight: "bold",
         color: "white",
         textTransform: "none",
@@ -13,13 +34,26 @@ export const ArticleCard = () => {
         position: "relative",
         zIndex: 2,
         "&:hover": {
-            transform: "translateY(-4px)",
-            boxShadow: "8px 8px 0px 0px black",
-            // background: "linear-gradient(to right, #6366f1, #7c3aed)",
-            cursor: "pointer",
+          transform: "translateY(-4px)",
+          boxShadow: "8px 8px 0px 0px black",
+          cursor: "pointer",
         },
-    }}>
-        <Typography variant={'h5'} fontWeight={'bold'}>Title</Typography>
-        <Typography variant={'subtitle1'}>Date</Typography>
-    </Box>)
-}
+      }}
+    >
+      <Typography
+        variant={"h5"}
+        fontWeight={"bold"}
+        component={"a"}
+        onClick={handleClick}
+        sx={{
+          "&:hover": {
+            cursor: "pointer",
+          },
+        }}
+      >
+        {title}
+      </Typography>
+      <Typography variant={"subtitle1"}>{formattedDate}</Typography>
+    </Box>
+  );
+};
