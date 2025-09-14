@@ -1,6 +1,9 @@
 package scheduler
 
 import (
+	"fmt"
+	"log/slog"
+
 	"github.com/mmcdole/gofeed"
 	"github.com/spyrosmoux/gorss/article"
 	"github.com/spyrosmoux/gorss/feed"
@@ -30,11 +33,17 @@ func (schedulerService schedulerService) SyncArticlesAllFeeds() error {
 		return err
 	}
 
+	var syncErrors []error
 	for _, feed := range feeds {
 		err := schedulerService.articleService.SyncArticlesByFeed(feed)
 		if err != nil {
-			return err
+			slog.Error("failed to sync feed", "feed", feed.Name, "error", err)
+			syncErrors = append(syncErrors, err)
 		}
+	}
+
+	if len(syncErrors) > 0 {
+		return fmt.Errorf("failed to sync %d feeds", len(syncErrors))
 	}
 
 	return nil
