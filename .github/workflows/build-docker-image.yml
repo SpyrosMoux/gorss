@@ -10,7 +10,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  API_IMAGE_NAME: ${{ github.repository }}/gorss
+  WEB_IMAGE_NAME: ${{ github.repository }}/gorss-web
 
 jobs:
   build-docker-image:
@@ -32,11 +33,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.ghcr_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
+      - name: Extract metadata (tags, labels) for Api
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.API_IMAGE_NAME }}
 
       - name: Build and push Api
         uses: docker/build-push-action@v5
@@ -46,6 +47,12 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Extract metadata (tags, labels) for Web
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.WEB_IMAGE_NAME }}
 
       - name: Build and push Web
         uses: docker/build-push-action@v5
