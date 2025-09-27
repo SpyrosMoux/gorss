@@ -15,7 +15,7 @@ env:
 
 jobs:
   build-api-docker-image:
-    name: Build Docker Image
+    name: Build Api Docker Image
     runs-on: ubuntu-latest
 
     permissions:
@@ -49,7 +49,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   build-web-docker-image:
-    name: Build Docker Image
+    name: Build Web Docker Image
     runs-on: ubuntu-latest
 
     permissions:
