@@ -8,17 +8,34 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spyrosmoux/gorss/article"
 	"github.com/spyrosmoux/gorss/db"
+	"github.com/spyrosmoux/gorss/env"
 	"github.com/spyrosmoux/gorss/feed"
 	"github.com/spyrosmoux/gorss/models"
 	"github.com/spyrosmoux/gorss/routes"
 	"github.com/spyrosmoux/gorss/scheduler"
 )
 
-var router *gin.Engine
-var sch *scheduler.Scheduler
+var (
+	apiPort string
+	dbHost  string
+	dbPort  string
+	dbUser  string
+	dbPass  string
+	dbName  string
+	router  *gin.Engine
+	sch     *scheduler.Scheduler
+)
 
 func init() {
-	err := db.Connect(&models.Feed{}, &models.Article{})
+	apiPort = env.LoadEnvVariable("API_PORT")
+	dbHost = env.LoadEnvVariable("DB_HOST")
+	dbPort = env.LoadEnvVariable("DB_PORT")
+	dbUser = env.LoadEnvVariable("DB_USER")
+	dbPass = env.LoadEnvVariable("DB_PASS")
+	dbName = env.LoadEnvVariable("DB_NAME")
+
+	dsn := "host=" + dbHost + " user=" + dbUser + " password=" + dbPass + " dbname=" + dbName + " port=" + dbPort + " sslmode=disable"
+	err := db.Init(dsn, "gorss", &models.Feed{}, &models.Article{})
 	if err != nil {
 		slog.Error(err.Error())
 		os.Exit(1)
@@ -32,10 +49,10 @@ func main() {
 	sch.Start()
 	defer sch.Stop()
 
-	slog.Info("started server on", "port", "8080")
-	err := router.Run(":8080")
+	slog.Info("started server on", "port", apiPort)
+	err := router.Run(":" + apiPort)
 	if err != nil {
-		slog.Error("failed to start server", "port", "8080", "err", err)
+		slog.Error("failed to start server", "port", apiPort, "err", err)
 		os.Exit(1)
 	}
 }
