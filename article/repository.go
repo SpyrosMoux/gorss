@@ -47,7 +47,7 @@ func (articleRepository articleRepository) FindAllByDate(orderDirection db.Order
 
 func (articleRepository articleRepository) FindAllByFeedId(feedId string) ([]*models.Article, error) {
 	var articles []*models.Article
-	result := articleRepository.dbConn.Where("feed_id = ?1", feedId).Find(&articles)
+	result := articleRepository.dbConn.Where("feed_id = ?", feedId).Find(&articles)
 	if result.Error != nil {
 		return nil, result.Error
 	}
