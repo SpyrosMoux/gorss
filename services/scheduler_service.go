@@ -1,12 +1,11 @@
-package scheduler
+package services
 
 import (
 	"fmt"
 	"log/slog"
 
+	"github.com/SpyrosMoux/gorss/repositories"
 	"github.com/mmcdole/gofeed"
-	"github.com/spyrosmoux/gorss/article"
-	"github.com/spyrosmoux/gorss/feed"
 )
 
 type SchedulerService interface {
@@ -15,11 +14,11 @@ type SchedulerService interface {
 
 type schedulerService struct {
 	feedParser     *gofeed.Parser
-	feedRepository feed.FeedRepository
-	articleService article.ArticleService
+	feedRepository repositories.FeedRepository
+	articleService ArticleService
 }
 
-func NewSchedulerService(feedRepo feed.FeedRepository, articleService article.ArticleService) SchedulerService {
+func NewSchedulerService(feedRepo repositories.FeedRepository, articleService ArticleService) SchedulerService {
 	return &schedulerService{
 		feedParser:     gofeed.NewParser(),
 		feedRepository: feedRepo,

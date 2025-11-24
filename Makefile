@@ -1,4 +1,4 @@
-DOCKER_REPO = ghcr.io/spyrosmoux/gorss
+DOCKER_REPO = ghcr.io/SpyrosMoux/gorss
 TAG ?= latest
 PLATFORM = linux/amd64
 BUILD_DIR = build

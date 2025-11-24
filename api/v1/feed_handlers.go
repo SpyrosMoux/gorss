@@ -1,8 +1,10 @@
-package feed
+package v1
 
 import (
 	"net/http"
 
+	"github.com/SpyrosMoux/gorss/models"
+	"github.com/SpyrosMoux/gorss/services"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,17 +14,17 @@ type FeedHandler interface {
 }
 
 type feedHandler struct {
-	feedService FeedService
+	feedService services.FeedService
 }
 
-func NewFeedHandler(feedService FeedService) FeedHandler {
+func NewFeedHandler(feedService services.FeedService) FeedHandler {
 	return &feedHandler{
 		feedService: feedService,
 	}
 }
 
 func (feedHandler feedHandler) HandleAddFeed(ctx *gin.Context) {
-	var addFeedDto AddFeedDto
+	var addFeedDto models.AddFeedDto
 	err := ctx.ShouldBindJSON(&addFeedDto)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"err": err.Error()})

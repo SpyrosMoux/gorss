@@ -1,7 +1,7 @@
-package feed
+package repositories
 
 import (
-	"github.com/spyrosmoux/gorss/models"
+	"github.com/SpyrosMoux/gorss/models"
 	"gorm.io/gorm"
 )
 
