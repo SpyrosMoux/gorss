@@ -11,7 +11,9 @@ import (
 	"github.com/SpyrosMoux/gorss/repositories"
 	"github.com/SpyrosMoux/gorss/services"
 	"github.com/SpyrosMoux/helpers/env"
+	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 var (
@@ -23,9 +25,14 @@ var (
 	dbName    string
 	router    *gin.Engine
 	scheduler *models.Scheduler
+	slogger   *zap.SugaredLogger
 )
 
 func init() {
+	logger, _ := zap.NewProduction()
+	defer logger.Sync()
+	slogger = logger.Sugar()
+
 	apiPort = env.LoadEnvVariable("API_PORT")
 	dbHost = env.LoadEnvVariable("DB_HOST")
 	dbPort = env.LoadEnvVariable("DB_PORT")
@@ -41,14 +48,15 @@ func init() {
 	}
 
 	articleRepository := repositories.NewRepository(db.Conn)
-	articleService := services.NewArticleService(articleRepository)
+	articleService := services.NewArticleService(slogger, articleRepository)
 	articleHandlerV1 := v1.NewArticleHandler(articleService)
 
 	feedRepository := repositories.NewFeedRepository(db.Conn)
-	feedService := services.NewFeedService(feedRepository, articleService)
+	feedService := services.NewFeedService(slogger, feedRepository, articleService)
 	feedHandlerV1 := v1.NewFeedHandler(feedService)
 
-	router = gin.Default()
+	router = gin.New()
+	router.Use(ginzap.Ginzap(slogger.Desugar(), time.RFC3339, true))
 	apiV1 := router.Group("/api/v1")
 	v1.RegisterV1Routes(apiV1, articleHandlerV1, feedHandlerV1)
 
@@ -59,19 +67,18 @@ func main() {
 	scheduler.Start()
 	defer scheduler.Stop()
 
-	slog.Info("started server on", "port", apiPort)
+	slogger.Infow("started server", "port", apiPort)
 	err := router.Run(":" + apiPort)
 	if err != nil {
-		slog.Error("failed to start server", "port", apiPort, "err", err)
-		os.Exit(1)
+		slogger.Fatalw("failed to start server", "port", apiPort, "err", err)
 	}
 }
 
 func setupScheduler() {
 	articleRepo := repositories.NewRepository(db.Conn)
-	articleService := services.NewArticleService(articleRepo)
+	articleService := services.NewArticleService(slogger, articleRepo)
 	feedRepo := repositories.NewFeedRepository(db.Conn)
-	schedulerService := services.NewSchedulerService(feedRepo, articleService)
-	scheduler = models.NewScheduler()
-	scheduler.AddTask("SyncAllFeeds", 10*time.Second, schedulerService.SyncArticlesAllFeeds)
+	schedulerService := services.NewSchedulerService(slogger, feedRepo, articleService)
+	scheduler = models.NewScheduler(slogger)
+	scheduler.AddTask("SyncAllFeeds", time.Hour, schedulerService.SyncArticlesAllFeeds)
 }

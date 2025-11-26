@@ -3,7 +3,7 @@ TAG ?= latest
 PLATFORM = linux/amd64
 BUILD_DIR = build
 
-.PHONY: build build-docker-api build-docker-web run run-docker
+.PHONY: build build-docker-api build-docker-web run run-docker dev
 
 default: run
 
@@ -17,6 +17,10 @@ build-docker-api:
 build-docker-web:
 	docker build -t $(DOCKER_REPO)/gorss-web:$(TAG) . -f docker/Dockerfile.web --platform $(PLATFORM)
 	docker push $(DOCKER_REPO)/gorss-web:$(TAG)
+
+dev:
+	docker compose -f docker/docker-compose.yaml up -d
+	make run
 
 run:
 	go run main.go

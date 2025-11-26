@@ -6,9 +6,11 @@ toolchain go1.23.8
 
 require (
 	github.com/SpyrosMoux/helpers/env v0.0.0-20251124213735-0e9fb1a89841
+	github.com/gin-contrib/zap v1.1.5
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/uuid v1.6.0
 	github.com/mmcdole/gofeed v1.3.0
+	go.uber.org/zap v1.27.1
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.25.12
 )
@@ -34,7 +36,6 @@ require (
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
-	github.com/kr/text v0.2.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mmcdole/goxpp v1.1.1-0.20240225020742-a0c311522b23 // indirect
@@ -44,6 +45,7 @@ require (
 	github.com/rogpeppe/go-internal v1.8.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.15.0 // indirect
 	golang.org/x/crypto v0.36.0 // indirect
 	golang.org/x/net v0.38.0 // indirect
