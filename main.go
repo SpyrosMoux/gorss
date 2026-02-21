@@ -11,21 +11,23 @@ import (
 	"github.com/SpyrosMoux/gorss/models"
 	"github.com/SpyrosMoux/gorss/repositories"
 	"github.com/SpyrosMoux/gorss/services"
+	"github.com/gin-contrib/cors"
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
 var (
-	apiPort   string
-	dbHost    string
-	dbPort    string
-	dbUser    string
-	dbPass    string
-	dbName    string
-	router    *gin.Engine
-	scheduler *models.Scheduler
-	slogger   *zap.SugaredLogger
+	apiPort     string
+	dbHost      string
+	dbPort      string
+	dbUser      string
+	dbPass      string
+	dbName      string
+	environment string
+	router      *gin.Engine
+	scheduler   *models.Scheduler
+	slogger     *zap.SugaredLogger
 )
 
 func init() {
@@ -39,6 +41,7 @@ func init() {
 	dbUser = env.LoadEnvVariable("DB_USER")
 	dbPass = env.LoadEnvVariable("DB_PASS")
 	dbName = env.LoadEnvVariable("DB_NAME")
+	environment = env.LoadEnvVariable("ENVIRONMENT")
 
 	dsn := "host=" + dbHost + " user=" + dbUser + " password=" + dbPass + " dbname=" + dbName + " port=" + dbPort + " sslmode=disable"
 	err := db.Init(dsn, "gorss", &models.Feed{}, &models.Article{})
@@ -57,6 +60,13 @@ func init() {
 
 	router = gin.New()
 	router.Use(ginzap.Ginzap(slogger.Desugar(), time.RFC3339, true))
+
+	if environment == "UAT" || environment == "DEV" {
+		router.Use(cors.New(cors.Config{
+			AllowOrigins: []string{"http://localhost:3000", "http://localhost:5173"},
+		}))
+	}
+
 	apiV1 := router.Group("/api/v1")
 	v1.RegisterV1Routes(apiV1, articleHandlerV1, feedHandlerV1)
 
