@@ -1,8 +1,9 @@
-package scheduler
+package models
 
 import (
-	"log/slog"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 type Task struct {
@@ -12,14 +13,16 @@ type Task struct {
 }
 
 type Scheduler struct {
-	tasks []Task
-	quit  chan struct{}
+	slogger *zap.SugaredLogger
+	tasks   []Task
+	quit    chan struct{}
 }
 
-func NewScheduler() *Scheduler {
+func NewScheduler(slogger *zap.SugaredLogger) *Scheduler {
 	return &Scheduler{
-		tasks: []Task{},
-		quit:  make(chan struct{}),
+		slogger: slogger,
+		tasks:   []Task{},
+		quit:    make(chan struct{}),
 	}
 }
 
@@ -45,13 +48,13 @@ func (s *Scheduler) Start() {
 				// On every tick, run the task in its own goroutine
 				case <-ticker.C:
 					go func() {
-						slog.Info("started scheduled job", "job", t.Title)
+						s.slogger.Infow("started scheduled job", "job", t.Title)
 						err := t.Job()
 						if err != nil {
-							slog.Error("scheduled job failed", "job", t.Title, "err", err)
+							s.slogger.Infow("scheduled job failed", "job", t.Title, "err", err)
 							return
 						}
-						slog.Info("finished scheduled job", "job", t.Title)
+						s.slogger.Infow("finished scheduled job", "job", t.Title)
 					}()
 
 					// If we receive from the quit channel, exit the loop and stop the task

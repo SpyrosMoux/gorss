@@ -1,10 +1,10 @@
-package article
+package repositories
 
 import (
 	"fmt"
 
-	"github.com/spyrosmoux/gorss/db"
-	"github.com/spyrosmoux/gorss/models"
+	"github.com/SpyrosMoux/gorss/db"
+	"github.com/SpyrosMoux/gorss/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )

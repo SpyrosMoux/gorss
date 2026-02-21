@@ -1,12 +1,11 @@
-package scheduler
+package services
 
 import (
 	"fmt"
-	"log/slog"
 
+	"github.com/SpyrosMoux/gorss/repositories"
 	"github.com/mmcdole/gofeed"
-	"github.com/spyrosmoux/gorss/article"
-	"github.com/spyrosmoux/gorss/feed"
+	"go.uber.org/zap"
 )
 
 type SchedulerService interface {
@@ -14,13 +13,15 @@ type SchedulerService interface {
 }
 
 type schedulerService struct {
+	slogger        *zap.SugaredLogger
 	feedParser     *gofeed.Parser
-	feedRepository feed.FeedRepository
-	articleService article.ArticleService
+	feedRepository repositories.FeedRepository
+	articleService ArticleService
 }
 
-func NewSchedulerService(feedRepo feed.FeedRepository, articleService article.ArticleService) SchedulerService {
+func NewSchedulerService(slogger *zap.SugaredLogger, feedRepo repositories.FeedRepository, articleService ArticleService) SchedulerService {
 	return &schedulerService{
+		slogger:        slogger,
 		feedParser:     gofeed.NewParser(),
 		feedRepository: feedRepo,
 		articleService: articleService,
@@ -37,7 +38,7 @@ func (schedulerService schedulerService) SyncArticlesAllFeeds() error {
 	for _, feed := range feeds {
 		err := schedulerService.articleService.SyncArticlesByFeed(feed)
 		if err != nil {
-			slog.Error("failed to sync feed", "feed", feed.Name, "error", err)
+			schedulerService.slogger.Errorw("failed to sync feed", "feed", feed.Name, "err", err)
 			syncErrors = append(syncErrors, err)
 		}
 	}

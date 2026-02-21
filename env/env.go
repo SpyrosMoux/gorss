@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/joho/godotenv"
+	"github.com/SpyrosMoux/godotenv"
 )
 
 func LoadEnvVariable(variable string) string {

@@ -5,28 +5,34 @@ import (
 	"os"
 	"time"
 
+	v1 "github.com/SpyrosMoux/gorss/api/v1"
+	"github.com/SpyrosMoux/gorss/db"
+	"github.com/SpyrosMoux/gorss/env"
+	"github.com/SpyrosMoux/gorss/models"
+	"github.com/SpyrosMoux/gorss/repositories"
+	"github.com/SpyrosMoux/gorss/services"
+	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
-	"github.com/spyrosmoux/gorss/article"
-	"github.com/spyrosmoux/gorss/db"
-	"github.com/spyrosmoux/gorss/env"
-	"github.com/spyrosmoux/gorss/feed"
-	"github.com/spyrosmoux/gorss/models"
-	"github.com/spyrosmoux/gorss/routes"
-	"github.com/spyrosmoux/gorss/scheduler"
+	"go.uber.org/zap"
 )
 
 var (
-	apiPort string
-	dbHost  string
-	dbPort  string
-	dbUser  string
-	dbPass  string
-	dbName  string
-	router  *gin.Engine
-	sch     *scheduler.Scheduler
+	apiPort   string
+	dbHost    string
+	dbPort    string
+	dbUser    string
+	dbPass    string
+	dbName    string
+	router    *gin.Engine
+	scheduler *models.Scheduler
+	slogger   *zap.SugaredLogger
 )
 
 func init() {
+	logger, _ := zap.NewProduction()
+	defer logger.Sync()
+	slogger = logger.Sugar()
+
 	apiPort = env.LoadEnvVariable("API_PORT")
 	dbHost = env.LoadEnvVariable("DB_HOST")
 	dbPort = env.LoadEnvVariable("DB_PORT")
@@ -41,27 +47,38 @@ func init() {
 		os.Exit(1)
 	}
 
-	router = routes.SetupRouter()
+	articleRepository := repositories.NewRepository(db.Conn)
+	articleService := services.NewArticleService(slogger, articleRepository)
+	articleHandlerV1 := v1.NewArticleHandler(articleService)
+
+	feedRepository := repositories.NewFeedRepository(db.Conn)
+	feedService := services.NewFeedService(slogger, feedRepository, articleService)
+	feedHandlerV1 := v1.NewFeedHandler(feedService)
+
+	router = gin.New()
+	router.Use(ginzap.Ginzap(slogger.Desugar(), time.RFC3339, true))
+	apiV1 := router.Group("/api/v1")
+	v1.RegisterV1Routes(apiV1, articleHandlerV1, feedHandlerV1)
+
 	setupScheduler()
 }
 
 func main() {
-	sch.Start()
-	defer sch.Stop()
+	scheduler.Start()
+	defer scheduler.Stop()
 
-	slog.Info("started server on", "port", apiPort)
+	slogger.Infow("started server", "port", apiPort)
 	err := router.Run(":" + apiPort)
 	if err != nil {
-		slog.Error("failed to start server", "port", apiPort, "err", err)
-		os.Exit(1)
+		slogger.Fatalw("failed to start server", "port", apiPort, "err", err)
 	}
 }
 
 func setupScheduler() {
-	articleRepo := article.NewRepository(db.Conn)
-	articleService := article.NewArticleService(articleRepo)
-	feedRepo := feed.NewFeedRepository(db.Conn)
-	schedulerService := scheduler.NewSchedulerService(feedRepo, articleService)
-	sch = scheduler.NewScheduler()
-	sch.AddTask("SyncAllFeeds", time.Hour, schedulerService.SyncArticlesAllFeeds)
+	articleRepo := repositories.NewRepository(db.Conn)
+	articleService := services.NewArticleService(slogger, articleRepo)
+	feedRepo := repositories.NewFeedRepository(db.Conn)
+	schedulerService := services.NewSchedulerService(slogger, feedRepo, articleService)
+	scheduler = models.NewScheduler(slogger)
+	scheduler.AddTask("SyncAllFeeds", time.Hour, schedulerService.SyncArticlesAllFeeds)
 }

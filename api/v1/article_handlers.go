@@ -1,8 +1,10 @@
-package article
+package v1
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/SpyrosMoux/gorss/services"
+	"github.com/gin-gonic/gin"
 )
 
 type ArticleHandler interface {
@@ -11,10 +13,10 @@ type ArticleHandler interface {
 }
 
 type articleHandler struct {
-	articleService ArticleService
+	articleService services.ArticleService
 }
 
-func NewArticleHandler(articleService ArticleService) ArticleHandler {
+func NewArticleHandler(articleService services.ArticleService) ArticleHandler {
 	return &articleHandler{articleService: articleService}
 }
 

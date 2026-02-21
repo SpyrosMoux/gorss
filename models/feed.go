@@ -10,3 +10,7 @@ type Feed struct {
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
+
+type AddFeedDto struct {
+	FeedUrl string `json:"feedUrl"`
+}
