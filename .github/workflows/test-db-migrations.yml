@@ -1,6 +1,7 @@
-name: test-db-migrations
+name: Test DB Migrations
 
 on:
+    workflow_dispatch:
     pull_request:
         paths:
             - migrations/**
