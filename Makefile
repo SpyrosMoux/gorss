@@ -43,4 +43,6 @@ atlas-migrate:
 
 .PHONY: atlas-apply
 atlas-apply:
-	atlas schema apply --env gorm -u "postgres://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable"
+	atlas schema apply --env gorm \
+		-u "postgres://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable" \
+		$(if $(CI),--auto-approve,)
