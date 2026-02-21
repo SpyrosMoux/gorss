@@ -63,7 +63,7 @@ func init() {
 
 	if environment == "UAT" || environment == "DEV" {
 		router.Use(cors.New(cors.Config{
-			AllowOrigins: []string{"http://localhost:3000", "http://localhost:5173"},
+			AllowOrigins: []string{"http://localhost:3000", "http://localhost:5173", "https://uat-gorss.spyrosmoux.com"},
 		}))
 	}
 
