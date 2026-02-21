@@ -1,0 +1,82 @@
+name: test-db-migrations
+
+on:
+    pull_request:
+        paths:
+            - migrations/**
+    push:
+        paths:
+            - migrations/**
+
+jobs:
+    test-db-migrations:
+        runs-on: ubuntu-latest
+
+        services:
+            postgres:
+                image: postgres:18
+                env:
+                    POSTGRES_USER: gorss
+                    POSTGRES_PASSWORD: gorss
+                    POSTGRES_DB: app_test
+                ports:
+                    - 5432:5432
+
+        env:
+            DB_HOST: localhost
+            DB_PORT: "5432"
+            DB_USER: gorss
+            DB_PASS: gorss
+            DB_NAME: gorss
+
+        steps:
+            -   uses: actions/checkout@v4
+
+            -   name: Set up Go
+                uses: actions/setup-go@v5
+                with:
+                    go-version-file: go.mod
+                    cache: true
+
+            -   name: Install Atlas
+                run: |
+                    curl -sSf https://atlasgo.sh | sh
+                    atlas version
+
+            -   name: Install psql client
+                run: |
+                    sudo apt-get update
+                    sudo apt-get install -y postgresql-client
+
+            -   name: Wait for DB and print version
+                env:
+                    PGPASSWORD: ${{ env.DB_PASS }}
+                run: |
+                    for i in {1..60}; do
+                      psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "select 1" && break
+                      sleep 2
+                    done
+                    psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "select version();"
+
+            # --- Migration correctness checks ---
+
+            # 1) Ensure models -> migrations are up to date:
+            #    Generate the diff and fail if it produces uncommitted changes.
+            -   name: Ensure migrations are committed (atlas migrate diff)
+                run: |
+                    make atlas-migrate
+                    git status --porcelain
+                    test -z "$(git status --porcelain)" || (echo "Uncommitted migration changes. Run 'make atlas-migrate' and commit the result." && exit 1)
+
+            # 2) Apply schema to the Postgres 18 service
+            -   name: Apply schema to Postgres 18 (atlas schema apply)
+                run: |
+                    make atlas-apply
+
+            # Optional: quick sanity checks after apply
+            -   name: Smoke check schema
+                env:
+                    PGPASSWORD: ${{ env.DB_PASS }}
+                run: |
+                    psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "\dt" || true
+                    psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "select now();"
