@@ -18,7 +18,7 @@ jobs:
                 env:
                     POSTGRES_USER: gorss
                     POSTGRES_PASSWORD: gorss
-                    POSTGRES_DB: app_test
+                    POSTGRES_DB: gorss
                 ports:
                     - 5432:5432
 
