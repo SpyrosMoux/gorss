@@ -66,8 +66,20 @@ jobs:
             -   name: Ensure migrations are committed (atlas migrate diff)
                 run: |
                     make atlas-migrate
-                    git status --porcelain
-                    test -z "$(git status --porcelain)" || (echo "Uncommitted migration changes. Run 'make atlas-migrate' and commit the result." && exit 1)
+                    
+                    # Any tracked file changes?
+                    if ! git diff --quiet -- migrations/; then
+                      echo "Modified migration files detected."
+                      git --no-pager diff -- migrations/
+                      exit 1
+                    fi
+                    
+                    # Any untracked migration files?
+                    if [ -n "$(git ls-files --others --exclude-standard migrations/)" ]; then
+                      echo "New untracked migration files detected:"
+                      git ls-files --others --exclude-standard migrations/
+                      exit 1
+                    fi
 
             # 2) Apply schema to the Postgres 18 service
             -   name: Apply schema to Postgres 18 (atlas schema apply)
