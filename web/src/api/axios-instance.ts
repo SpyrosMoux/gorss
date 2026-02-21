@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosApp = axios.create({
-  baseURL: "https://gorss-api.spyrosmoux.com/api",
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 export default axiosApp;
