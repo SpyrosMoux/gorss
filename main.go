@@ -5,9 +5,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/SpyrosMoux/godotenv"
 	v1 "github.com/SpyrosMoux/gorss/api/v1"
 	"github.com/SpyrosMoux/gorss/db"
+	"github.com/SpyrosMoux/gorss/env"
 	"github.com/SpyrosMoux/gorss/models"
 	"github.com/SpyrosMoux/gorss/repositories"
 	"github.com/SpyrosMoux/gorss/services"
@@ -33,20 +33,15 @@ func init() {
 	defer logger.Sync()
 	slogger = logger.Sugar()
 
-	err := godotenv.Load()
-	if err != nil {
-		slogger.Fatalw("failed to load .env file", "err", err)
-	}
-
-	apiPort = godotenv.GetOrExit("API_PORT")
-	dbHost = godotenv.GetOrExit("DB_HOST")
-	dbPort = godotenv.GetOrExit("DB_PORT")
-	dbUser = godotenv.GetOrExit("DB_USER")
-	dbPass = godotenv.GetOrExit("DB_PASS")
-	dbName = godotenv.GetOrExit("DB_NAME")
+	apiPort = env.LoadEnvVariable("API_PORT")
+	dbHost = env.LoadEnvVariable("DB_HOST")
+	dbPort = env.LoadEnvVariable("DB_PORT")
+	dbUser = env.LoadEnvVariable("DB_USER")
+	dbPass = env.LoadEnvVariable("DB_PASS")
+	dbName = env.LoadEnvVariable("DB_NAME")
 
 	dsn := "host=" + dbHost + " user=" + dbUser + " password=" + dbPass + " dbname=" + dbName + " port=" + dbPort + " sslmode=disable"
-	err = db.Init(dsn, "gorss", &models.Feed{}, &models.Article{})
+	err := db.Init(dsn, "gorss", &models.Feed{}, &models.Article{})
 	if err != nil {
 		slog.Error(err.Error())
 		os.Exit(1)
