@@ -15,12 +15,7 @@ export const Home = () => {
 
       <div className="flex flex-col gap-6 py-8">
         {articles?.map((article) => (
-          <ArticleCard
-            key={article.id}
-            title={article.title}
-            date={article.date}
-            hyperlink={article.link}
-          />
+          <ArticleCard key={article.id} article={article} />
         ))}
       </div>
     </>
