@@ -1,11 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { getLatestArticles } from "../../api/articles";
 
-const useLatestArticles = () => {
+export function useLatestArticles() {
   return useQuery({
-    queryKey: ["get-latest-articles"],
+    queryKey: ["articles", "latest"],
     queryFn: getLatestArticles,
   });
-};
-
-export default useLatestArticles;
+}

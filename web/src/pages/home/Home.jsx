@@ -1,8 +1,11 @@
 import { ArticleCard } from "../../components/ArticleCard.jsx";
-import useLatestArticles from "../../hooks/articles/useLatestArticles.js";
+import { useLatestArticles } from "../../hooks/articles/useLatestArticles";
 
 export const Home = () => {
-  const { data: latestArticleData } = useLatestArticles();
+  const { data: articles, isLoading, isError } = useLatestArticles();
+
+  if (isLoading) return <div className="p-4">Loading...</div>;
+  if (isError) return <div className="p-4">Failed to load articles.</div>;
 
   return (
     <>
@@ -11,12 +14,12 @@ export const Home = () => {
       </h1>
 
       <div className="flex flex-col gap-6 py-8">
-        {latestArticleData?.articles?.map((article) => (
+        {articles?.map((article) => (
           <ArticleCard
-            key={article?.id}
+            key={article.id}
             title={article.title}
             date={article.date}
-            hyperlink={article?.link}
+            hyperlink={article.link}
           />
         ))}
       </div>

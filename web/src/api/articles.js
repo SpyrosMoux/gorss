@@ -1,6 +1,6 @@
 import axiosApp from "./http";
 
 export const getLatestArticles = async () => {
-  const response = await axiosApp.get("/articles/latest");
-  return response.data;
+  const { data } = await axiosApp.get("/articles/latest");
+  return Array.isArray(data?.articles) ? data.articles : [];
 };
