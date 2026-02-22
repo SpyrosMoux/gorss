@@ -1,7 +1,11 @@
-// web/src/layouts/components/Header.jsx
 import React from "react";
-import { GLOBAL } from "../../config/global";
-import Anchor from "../../components/Anchor";
+import { ROUTES, GITHUB_PROFILE } from "../../../config/routes";
+import Anchor from "../../../components/Anchor";
+
+const NAV_ITEMS = [
+  { label: "Home", to: ROUTES.home },
+  { label: "Feeds", to: ROUTES.feeds },
+];
 
 function ThemeToggle({ onClick }) {
   return (
@@ -27,7 +31,7 @@ export default function Header() {
 
     const sync = () => {
       setIsMobile(mq.matches);
-      // leaving mobile -> force nav visible and reset open state
+      // leaving mobile -> force nav hidden and reset open state
       if (!mq.matches) setIsOpen(false);
     };
 
@@ -83,21 +87,17 @@ export default function Header() {
         </div>
 
         <div className="flex flex-col font-mono font-medium gap-4 sm:flex-row px-4 sm:px-0 mt-16 sm:mt-0">
-          {Object.entries(GLOBAL.menu).map(([label, url]) => (
-            <Anchor
-              key={label}
-              url={url}
-              onClick={() => setIsOpen(false)}
-            >
-              {label}
+          {NAV_ITEMS.map((item) => (
+            <Anchor key={item.to} url={item.to} onClick={() => setIsOpen(false)}>
+              {item.label}
             </Anchor>
           ))}
         </div>
 
         <div className="flex gap-4 justify-between px-4 sm:px-0">
-          {GLOBAL.githubProfile ? (
+          {GITHUB_PROFILE ? (
             <Anchor
-              url={GLOBAL.githubProfile}
+              url={GITHUB_PROFILE}
               aria-label="GoRSS GitHub Repository"
               onClick={() => setIsOpen(false)}
             >
@@ -113,6 +113,7 @@ export default function Header() {
             </Anchor>
           ) : null}
 
+          {/* Theme toggle not implemented yet: this only closes the mobile menu */}
           <ThemeToggle onClick={() => setIsOpen(false)} />
         </div>
       </nav>

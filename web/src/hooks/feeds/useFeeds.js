@@ -1,11 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { getFeeds } from "../../api/feed";
+import { getFeeds } from "../../api/feeds";
 
-const useFeeds = () => {
+export function useFeeds() {
   return useQuery({
     queryKey: ["feeds"],
     queryFn: getFeeds,
   });
-};
-
-export default useFeeds;
+}

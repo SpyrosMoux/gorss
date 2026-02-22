@@ -1,4 +1,4 @@
-import axiosApp from "./axios-instance";
+import axiosApp from "./http";
 
 export const getLatestArticles = async () => {
   const response = await axiosApp.get("/articles/latest");

@@ -1,5 +1,5 @@
 import { ArticleCard } from "../../components/ArticleCard.jsx";
-import useLatestArticles from "../../hooks/article/useLatestArticles";
+import useLatestArticles from "../../hooks/articles/useLatestArticles.js";
 
 export const Home = () => {
   const { data: latestArticleData } = useLatestArticles();
