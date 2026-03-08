@@ -98,11 +98,11 @@ jobs:
             RAILWAY_ENV: uat
 
         steps:
-            -   name: Redeploy API service (pull latest image)
-                run: railway redeploy -p "$RAILWAY_PROJECT_ID" -e "$RAILWAY_ENV" -s "${{ secrets.RAILWAY_SERVICE_API }}" -y
+            -   name: Deploy API service
+                run: railway up -p "$RAILWAY_PROJECT_ID" -e "$RAILWAY_ENV" -s "${{ secrets.RAILWAY_SERVICE_API }}" --ci
 
-            -   name: Redeploy Web service (pull latest image)
-                run: railway redeploy -p "$RAILWAY_PROJECT_ID" -e "$RAILWAY_ENV" -s "${{ secrets.RAILWAY_SERVICE_WEB }}" -y
+            -   name: Deploy Web service
+                run: railway up -p "$RAILWAY_PROJECT_ID" -e "$RAILWAY_ENV" -s "${{ secrets.RAILWAY_SERVICE_WEB }}" --ci
 
     deploy-railway-prod:
         name: Redeploy Railway Services (Production)
