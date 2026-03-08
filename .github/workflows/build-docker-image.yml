@@ -120,8 +120,8 @@ jobs:
             RAILWAY_ENV: production
 
         steps:
-            -   name: Redeploy API service (pull latest image)
-                run: railway redeploy -p "$RAILWAY_PROJECT_ID" -e "$RAILWAY_ENV" -s "${{ secrets.RAILWAY_SERVICE_API }}" -y
+            -   name: Deploy API service (pull latest image)
+                run: railway up -p "$RAILWAY_PROJECT_ID" -e "$RAILWAY_ENV" -s "${{ secrets.RAILWAY_SERVICE_API }}" -y
 
-            -   name: Redeploy Web service (pull latest image)
-                run: railway redeploy -p "$RAILWAY_PROJECT_ID" -e "$RAILWAY_ENV" -s "${{ secrets.RAILWAY_SERVICE_WEB }}" -y
+            -   name: Deploy Web service (pull latest image)
+                run: railway up -p "$RAILWAY_PROJECT_ID" -e "$RAILWAY_ENV" -s "${{ secrets.RAILWAY_SERVICE_WEB }}" -y
