@@ -121,7 +121,7 @@ jobs:
 
         steps:
             -   name: Deploy API service (pull latest image)
-                run: railway up -p "$RAILWAY_PROJECT_ID" -e "$RAILWAY_ENV" -s "${{ secrets.RAILWAY_SERVICE_API }}" -y
+                run: railway up -p "$RAILWAY_PROJECT_ID" -e "$RAILWAY_ENV" -s "${{ secrets.RAILWAY_SERVICE_API }}" --ci
 
             -   name: Deploy Web service (pull latest image)
-                run: railway up -p "$RAILWAY_PROJECT_ID" -e "$RAILWAY_ENV" -s "${{ secrets.RAILWAY_SERVICE_WEB }}" -y
+                run: railway up -p "$RAILWAY_PROJECT_ID" -e "$RAILWAY_ENV" -s "${{ secrets.RAILWAY_SERVICE_WEB }}" --ci
